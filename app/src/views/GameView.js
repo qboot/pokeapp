@@ -1,73 +1,127 @@
 import React from 'react';
 
-export default ({ data, status, socket }) => {
+export default ({ data, status, socket, resetGame }) => {
     let message = '';
 
-    if (status === 'waiting') {
-        message = "En attente d'un autre joueur...";
-    } else if (status === 'playing') {
-        // if data.turn === 'you'
-        message = 'Le combat commence';
+    switch (status) {
+        case 'waiting':
+            message = "En attente d'un autre joueur...";
+            break;
+        case 'playing':
+            if (data.turn === 'you') {
+                if (data.moveId !== undefined) {
+                    message = `${data.opponent.name} a joué ${data.opponent.pokemon.moves[data.moveId].name} avec ${
+                        data.opponent.pokemon.name
+                    }.`;
+                }
+
+                message += ' A toi de jouer ! Quelle attaque choisis-tu ?';
+            } else {
+                if (data.moveId !== undefined) {
+                    message = `Tu a joué ${data.you.pokemon.moves[data.moveId].name} avec ${data.you.pokemon.name}.`;
+                }
+
+                message += ` C'est au tour de ${data.opponent.name} de jouer...`;
+            }
+            break;
+        case 'ended':
+            if (data.win !== undefined) {
+                message = data.win ? 'Tu as gagné! Bravo.' : 'Perdu :(';
+            }
+            break;
+        case 'terminated':
+            message = "Ton adversaire s'est déconnecté :/";
+            break;
+        default: // do nothing
     }
 
-    const triggerAction1 = () => {
+    const triggerAction = moveId => {
         if (data.turn === 'you') {
-            socket.emit('move', 0);
+            socket.emit('move', moveId);
         }
+    };
+
+    const hpToPercent = pokemon => {
+        return Math.floor((pokemon.hp / pokemon.maxHp) * 100);
     };
 
     return (
         <>
             <div className="c-game">
-                <div className="c-game-row">
-                    <div className="c-pokemon-info">
-                        Pokemon 1
-                        <div className="c-pokemon__hp" style={{ '--pokemon-hp-percent': 80 }} />
-                    </div>
-                    <div className="c-pokemon">
-                        <div className="c-pokemon__image">
-                            {data?.opponent?.pokemon && (
+                {data && (
+                    <div className="c-game-row">
+                        <div className="c-pokemon-info">
+                            {`${data.opponent.name}'s ${data.opponent.pokemon.name} (${data.opponent.pokemon.hp}hp)`}
+                            <div
+                                className="c-pokemon__hp"
+                                style={{ '--pokemon-hp-percent': hpToPercent(data.opponent.pokemon) }}
+                            />
+                        </div>
+                        <div className="c-pokemon">
+                            <div className="c-pokemon__image">
                                 <img alt="Opponent Pokemon" src={data.opponent.pokemon.image} />
-                            )}
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div className="c-game-row">
-                    <div className="c-pokemon">
-                        <div className="c-pokemon__image">
-                            <img
-                                alt="Mine Pokemon"
-                                src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/132.png"
+                )}
+                {data && (
+                    <div className="c-game-row">
+                        <div className="c-pokemon">
+                            <div className="c-pokemon__image">
+                                <img alt="Mine Pokemon" src={data.you.pokemon.image} />
+                            </div>
+                        </div>
+                        <div className="c-pokemon-info">
+                            {`${data.you.name}'s ${data.you.pokemon.name} (${data.you.pokemon.hp}hp)`}
+                            <div
+                                className="c-pokemon__hp"
+                                style={{ '--pokemon-hp-percent': hpToPercent(data.you.pokemon) }}
                             />
                         </div>
                     </div>
-                    <div className="c-pokemon-info">
-                        Pokemon 2
-                        <div className="c-pokemon__hp" style={{ '--pokemon-hp-percent': 30 }} />
-                    </div>
-                </div>
+                )}
             </div>
             <div className="c-game-info">
                 <div className="c-message">
                     {message}
-                    <div className="c-form u-mt-base">
-                        <button onClick={() => console.log('TODO')}>Retourner au menu</button>
+                    {(status === 'terminated' || status === 'ended') && (
+                        <div className="c-form u-mt-base">
+                            <button onClick={resetGame}>Retourner au menu</button>
+                        </div>
+                    )}
+                </div>
+                {data && (
+                    <div className="c-actions">
+                        <button
+                            className="c-actions__action"
+                            onClick={() => triggerAction(0)}
+                            disabled={data.win !== undefined || data.turn === 'opponent'}
+                        >
+                            {data.you.pokemon.moves[0].name}
+                        </button>
+                        <button
+                            className="c-actions__action"
+                            onClick={() => triggerAction(1)}
+                            disabled={data.win !== undefined || data.turn === 'opponent'}
+                        >
+                            {data.you.pokemon.moves[1].name}
+                        </button>
+                        <button
+                            className="c-actions__action"
+                            onClick={() => triggerAction(2)}
+                            disabled={data.win !== undefined || data.turn === 'opponent'}
+                        >
+                            {data.you.pokemon.moves[2].name}
+                        </button>
+                        <button
+                            className="c-actions__action"
+                            onClick={() => triggerAction(3)}
+                            disabled={data.win !== undefined || data.turn === 'opponent'}
+                        >
+                            {data.you.pokemon.moves[3].name}
+                        </button>
                     </div>
-                </div>
-                <div className="c-actions">
-                    <button className="c-actions__action" onClick={triggerAction1}>
-                        Action 1
-                    </button>
-                    <button className="c-actions__action" onClick={() => console.log('TODO')}>
-                        Action 2
-                    </button>
-                    <button className="c-actions__action" onClick={() => console.log('TODO')}>
-                        Action 3
-                    </button>
-                    <button className="c-actions__action" onClick={() => console.log('TODO')} disabled>
-                        Action 4
-                    </button>
-                </div>
+                )}
             </div>
         </>
     );

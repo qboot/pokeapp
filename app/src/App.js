@@ -30,12 +30,36 @@ export default () => {
             setStatus('playing');
         });
 
-        // .on de l'index.html
+        socket.on('moved', localData => {
+            console.log(localData);
+            setData(localData);
+        });
+
+        socket.on('terminated', () => {
+            setStatus('terminated');
+            setData(null);
+        });
+
+        socket.on('ended', localData => {
+            console.log(localData);
+            setStatus('ended');
+            setData(localData);
+        });
     }, [socket]);
+
+    const resetGame = () => {
+        setName(null);
+        setData(null);
+        setStatus('waiting');
+
+        if (socket) {
+            socket.disconnect();
+        }
+    };
 
     return (
         <div className="c-app">
-            {name && <GameView data={data} status={status} socket={socket} />}
+            {name && <GameView data={data} status={status} socket={socket} resetGame={resetGame} />}
             {!name && <LoginView setName={setName} />}
             {/* <WelcomeView /> */}
             {/* <ChooseView /> */}

@@ -44,18 +44,51 @@ export const terminateGame = (socket, players) => {
 };
 
 export const handleMove = (moveId, players, config) => {
-    // console.log(`${activePlayer.name} with "${activePlayer.pokemon.name}" has played "${move.name}"`);
-    // console.log(`${opponent.pokemon.name} (${opponent.pokemon.hp}hp) has taken ${move.power} damages`);
+    const activePlayer = players[config.turn];
+    const opponent = players[0 === config.turn ? 1 : 0];
+    const move = activePlayer.pokemon.moves[moveId];
 
-    // TODO
-};
+    console.log(`${activePlayer.name} with "${activePlayer.pokemon.name}" has played "${move.name}"`);
+    console.log(`${opponent.pokemon.name} (${opponent.pokemon.hp}hp) has taken ${move.power} damages`);
 
-const updateGame = (moveId, players, config) => {
-    // TODO
+    opponent.pokemon.hp -= move.power;
+
+    if (opponent.pokemon.hp <= 0) {
+        endGame(players);
+    } else {
+        updateGame(moveId, players, config);
+    }
 };
 
 const endGame = players => {
     console.log('Game ending...');
 
-    // TODO
+    const winnerIndex = players.findIndex(player => 0 < player.pokemon.hp);
+
+    for (const [i, player] of players.entries()) {
+        const { socket, ...you } = player;
+        const { socket: _, ...opponent } = players.find(player => player.socket.id !== socket.id);
+
+        player.socket.emit('ended', {
+            you,
+            opponent,
+            win: i === winnerIndex,
+        });
+    }
+};
+
+export const updateGame = (moveId, players, config) => {
+    config.turn = 0 === config.turn ? 1 : 0;
+
+    for (const [i, player] of players.entries()) {
+        const { socket, ...you } = player;
+        const { socket: _, ...opponent } = players.find(player => player.socket.id !== socket.id);
+
+        player.socket.emit('moved', {
+            you,
+            opponent,
+            moveId,
+            turn: i === config.turn ? 'you' : 'opponent',
+        });
+    }
 };

@@ -3,6 +3,7 @@
         "originalId": 1,
         "name": "Bulbizarre",
         "hp": 45,
+        "maxHp": 45,
         "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png",
         "moves": [
             {
@@ -31,6 +32,7 @@
         "originalId": 4,
         "name": "Salamèche",
         "hp": 39,
+        "maxHp": 39,
         "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/4.png",
         "moves": [
             {
@@ -59,6 +61,7 @@
         "originalId": 7,
         "name": "Carapuce",
         "hp": 44,
+        "maxHp": 44,
         "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/7.png",
         "moves": [
             {
@@ -87,6 +90,7 @@
         "originalId": 25,
         "name": "Pikachu",
         "hp": 35,
+        "maxHp": 35,
         "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png",
         "moves": [
             {
@@ -115,6 +119,7 @@
         "originalId": 133,
         "name": "Évoli",
         "hp": 55,
+        "maxHp": 55,
         "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/133.png",
         "moves": [
             {
